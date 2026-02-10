@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>首页</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; text-align: center; }
+        .container { padding: 30px; border: 1px solid #ddd; border-radius: 5px; }
+        .user-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        button {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .welcome { color: #28a745; font-size: 24px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>数字识别平台</h1>
+
+        <div id="userInfo" class="user-info" style="display:none;">
+            <p>欢迎，<span id="usernameDisplay"></span>！</p>
+        </div>
+
+        <div id="notLoggedIn" style="display:none;">
+            <p>您还没有登录</p>
+            <a href="login.html"><button>去登录</button></a>
+        </div>
+
+        <div id="loggedIn" style="display:none;">
+            <p class="welcome">您已成功登录系统</p>
+            <p>数字识别平台</p>
+
+
+            <button onclick="logout()">退出登录</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5001/api';
+
+        // DOM元素
+        const userInfoDiv = document.getElementById('userInfo');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const notLoggedInDiv = document.getElementById('notLoggedIn');
+        const loggedInDiv = document.getElementById('loggedIn');
+
+        // 检查登录状态
+        async function checkLogin() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/check_login`, {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // 已登录
+                    userInfoDiv.style.display = 'block';
+                    usernameDisplay.textContent = data.username;
+
+                    notLoggedInDiv.style.display = 'none';
+                    loggedInDiv.style.display = 'block';
+                } else {
+                    // 未登录
+                    userInfoDiv.style.display = 'none';
+                    notLoggedInDiv.style.display = 'block';
+                    loggedInDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+                alert('后端服务未启动，请先运行后端程序');
+            }
+        }
+
+        // 退出登录
+        async function logout() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/logout`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert('已退出登录');
+                    window.location.href = 'login.html';
+                }
+            } catch (error) {
+                console.error('退出失败:', error);
+            }
+        }
+
+        // 页面加载时检查登录状态
+        window.addEventListener('load', checkLogin);
+    </script>
+</body>
+</html>
